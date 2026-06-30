@@ -452,6 +452,21 @@
       saveProgress();
     }
 
+    function masteryAfterAnswer(question, ok) {
+      const current = progressFor(question.card);
+      if (!ok) return "learning";
+      if (current.mastery === "mastered") return "mastered";
+      const nextCorrect = current.correct + 1;
+      const strongMode = ["zh2fr", "spelling", "listening"].includes(question.mode);
+      if (nextCorrect >= (strongMode ? 2 : 3)) return "mastered";
+      if (strongMode && current.mastery === "familiar") return "mastered";
+      return "familiar";
+    }
+
+    function publicMasteryText(value) {
+      return { unseen: "未学", learning: "需要复习", familiar: "较熟", mastered: "已掌握" }[value] || value;
+    }
+
     function filteredCards() {
       let list = cards;
       if (state.studyDay && state.studyDay !== "全部计划") {
@@ -487,11 +502,15 @@
       const card = chooseWeighted(list);
       state.cardPreview = null;
       const mastery = progressFor(card).mastery;
-      const modes = forceCard || mastery === "unseen"
+      let modes = forceCard || mastery === "unseen"
         ? ["card", "fr2zh", "listening"]
         : mastery === "learning"
           ? ["fr2zh", "listening", "zh2frChoice", "zh2fr"]
           : ["zh2fr", "zh2frChoice", "spelling", "listening"];
+      if (!canAskFrenchProduction(card)) {
+        modes = modes.filter(mode => !["zh2fr", "zh2frChoice", "spelling"].includes(mode));
+        if (!modes.length) modes = ["card", "fr2zh", "listening"];
+      }
       const mode = modes[Math.floor(Math.random() * modes.length)];
       if (mode === "card") {
         state.current = card;
@@ -516,7 +535,13 @@
     }
 
     function answerCandidates(question) {
-      const raw = [question.correct, question.card.answer, question.card.french]
+      const raw = [
+        question.correct,
+        question.card.drillAnswer,
+        question.card.answer,
+        question.card.french,
+        ...(question.card.acceptedAnswers || [])
+      ]
         .filter(Boolean)
         .flatMap(value => String(value).split(/\s*\/\s*|\s*;\s*/));
       return [...new Set(raw.map(cleanAnswer).filter(Boolean))];
@@ -539,7 +564,46 @@
       return choices.sort(() => Math.random() - 0.5);
     }
 
+    function frenchAnswerForCard(card) {
+      return card.drillAnswer || card.answer || card.french;
+    }
+
+    function canAskFrenchProduction(card) {
+      if (card.drillAnswer) return true;
+      const answer = frenchAnswerForCard(card);
+      return !(/[+=]/.test(answer) || answer.includes("..."));
+    }
+
+    function zhPromptForFrenchAnswer(card) {
+      if (card.drillPrompt) return card.drillPrompt;
+      let prompt = String(card.chinese || "");
+      const leakParts = [
+        card.french,
+        card.answer,
+        card.example,
+        card.spoken
+      ].filter(Boolean);
+      leakParts.forEach(part => {
+        String(part).split(/\s*\/\s*|\s*;\s*/).forEach(piece => {
+          const trimmed = piece.trim();
+          if (trimmed.length >= 2) {
+            prompt = prompt.split(trimmed).join("____");
+          }
+        });
+      });
+      prompt = prompt
+        .replace(/[：:]\s*[^：:]*[A-Za-zÀ-ÖØ-öø-ÿ][^：:]*$/g, "")
+        .replace(/[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ’'\-\s]*(?:[.!?]|$)/g, "____")
+        .replace(/[：:]\s*____\s*$/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      return prompt || "根据考点写出对应法语";
+    }
+
     function buildQuestion(mode, card, pool = cards) {
+      if (["zh2fr", "zh2frChoice", "spelling"].includes(mode) && !canAskFrenchProduction(card)) {
+        mode = "fr2zh";
+      }
       if (mode === "fr2zh") {
         return {
           mode, card,
@@ -564,10 +628,10 @@
         return {
           mode, card,
           title: "中译法选择",
-          prompt: card.chinese,
+          prompt: zhPromptForFrenchAnswer(card),
           sub: "选择正确法语；每个法语选项都可以播放",
-          correct: card.french,
-          choices: sampleChoices(card, pool, item => item.french)
+          correct: frenchAnswerForCard(card),
+          choices: sampleChoices(card, pool.filter(canAskFrenchProduction), frenchAnswerForCard)
         };
       }
       if (mode === "spelling") {
@@ -576,16 +640,16 @@
           title: "听音拼写",
           prompt: "输入听到的法语",
           sub: "重音符号要尽量正确，例如 é、è、ç、à",
-          correct: card.answer,
+          correct: frenchAnswerForCard(card),
           input: true
         };
       }
       return {
         mode, card,
         title: "中译法",
-        prompt: card.chinese,
+        prompt: zhPromptForFrenchAnswer(card),
         sub: "输入对应法语",
-        correct: card.answer,
+        correct: frenchAnswerForCard(card),
         input: true
       };
     }
@@ -806,7 +870,7 @@
         body.querySelector("#checkAnswer").onclick = () => {
           const value = body.querySelector("#answerInput").value;
           const ok = answerMatches(value, question);
-          handleAnswer(ok, question, feedback, mockMode);
+          handleAnswer(ok, question, feedback, mockMode, value);
         };
         body.querySelector("#answerInput").addEventListener("keydown", event => {
           if (event.key === "Enter") body.querySelector("#checkAnswer").click();
@@ -826,7 +890,7 @@
           row.querySelector(".choice").onclick = () => {
             const ok = choice === question.correct;
             row.querySelector(".choice").classList.add(ok ? "correct" : "wrong");
-            handleAnswer(ok, question, feedback, mockMode);
+            handleAnswer(ok, question, feedback, mockMode, choice);
           };
           body.appendChild(row);
         });
@@ -852,10 +916,16 @@
       return box;
     }
 
-    function handleAnswer(ok, question, feedback, mockMode) {
-      feedback.textContent = ok ? "正确" : `不对，答案是：${question.correct}`;
+    function handleAnswer(ok, question, feedback, mockMode, submittedValue = "") {
+      if (question.answered) return;
+      question.answered = true;
+      const nextMastery = masteryAfterAnswer(question, ok);
+      const numberHint = ok && /\d/.test(submittedValue) ? "；数字建议写成法文" : "";
+      feedback.textContent = ok
+        ? `正确${numberHint}，已自动标记为：${publicMasteryText(nextMastery)}`
+        : `不对，答案是：${question.correct}。已自动标记为：需要复习`;
       feedback.className = `feedback ${ok ? "good" : "bad"}`;
-      if (!mockMode) setProgress(question.card, ok ? "familiar" : "learning", ok ? 1 : 0, ok ? 0 : 1);
+      if (!mockMode) setProgress(question.card, nextMastery, ok ? 1 : 0, ok ? 0 : 1);
       if (mockMode && !question.done) {
         question.done = true;
         if (ok) state.mock.score += 1;
