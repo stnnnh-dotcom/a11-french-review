@@ -6386,10 +6386,20 @@ window.EXAM_CARDS = [
     "ipa": "",
     "chinese": "表示年龄：J’ai 25 ans.",
     "example": "J’ai vingt-cinq ans.",
-    "note": "A1 范围核心表达，要求会认、会听、会拼写。",
+    "note": "年龄表达用 avoir：j’ai + 数字 + ans。考试书写时尽量把数字写成法文，例如 vingt-cinq。",
     "priority": "P00",
     "kind": "语法",
     "spoken": "J’ai vingt-cinq ans.",
+    "drillPrompt": "我25岁",
+    "drillAnswer": "j’ai vingt-cinq ans",
+    "acceptedAnswers": [
+      "j’ai vingt-cinq ans",
+      "j'ai vingt-cinq ans",
+      "j’ai vingt cinq ans",
+      "j'ai vingt cinq ans",
+      "j’ai 25 ans",
+      "j'ai 25 ans"
+    ],
     "studyDay": "6月29日 周一：核心语法"
   },
   {
