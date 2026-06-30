@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A1.1 考前复习</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #eef3f8;
+      --surface: rgba(255,255,255,.92);
+      --surface-2: #f6f8fb;
+      --text: #172033;
+      --muted: #667085;
+      --line: rgba(23,32,51,.12);
+      --green: #1f9a64;
+      --blue: #2e67d1;
+      --red: #cf4f4f;
+      --yellow: #d89424;
+      --pink: #d94f86;
+      --shadow: rgba(20,36,64,.16);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111827;
+        --surface: rgba(28,36,51,.94);
+        --surface-2: #202a3a;
+        --text: #f8fafc;
+        --muted: #a5b0c2;
+        --line: rgba(255,255,255,.14);
+        --shadow: rgba(0,0,0,.35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--bg), #f7fbfa 70%, rgba(31,154,100,.12));
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .runtime-warning {
+      margin: 12px;
+      padding: 14px;
+      border: 1px solid rgba(207,79,79,.35);
+      border-radius: 12px;
+      background: rgba(207,79,79,.08);
+      color: var(--text);
+      line-height: 1.55;
+      font-weight: 720;
+    }
+    .runtime-warning strong { color: var(--red); }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+    }
+    aside {
+      border-right: 1px solid var(--line);
+      padding: 22px;
+      background: rgba(255,255,255,.42);
+      backdrop-filter: blur(22px);
+      overflow: auto;
+    }
+    main {
+      min-width: 0;
+      padding: 26px;
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    .brand h1 { margin-bottom: 6px; font-size: 24px; letter-spacing: 0; }
+    .brand p { margin-bottom: 18px; color: var(--muted); line-height: 1.5; }
+    .nav { display: grid; gap: 8px; margin-bottom: 18px; }
+    .nav button, .primary, .ghost, .danger {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0 14px;
+      color: var(--text);
+      background: var(--surface);
+      font-weight: 760;
+    }
+    .nav button.active, .primary {
+      border-color: transparent;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+    }
+    .danger { border-color: transparent; color: white; background: var(--red); }
+    .ghost { background: transparent; }
+    .plan-list { display: grid; gap: 10px; }
+    .plan-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+    .plan-item strong { display: block; margin-bottom: 4px; }
+    .plan-item span { color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+    }
+    .stat, .panel, .card-face, .word-card, .quiz-box {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: 0 18px 48px var(--shadow);
+    }
+    .stat { padding: 14px; box-shadow: none; }
+    .stat span { display: block; color: var(--muted); font-size: 12px; font-weight: 760; }
+    .stat strong { display: block; margin-top: 4px; font-size: 28px; }
+    .panel { padding: 18px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+    .segmented { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      color: var(--text);
+      font-weight: 720;
+    }
+    .pill.active { color: white; border-color: transparent; background: var(--green); }
+    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
+
+    .study-layout {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+    }
+    .stage {
+      width: min(620px, 100%);
+      height: 390px;
+      perspective: 1200px;
+    }
+    .flashcard {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform .55s cubic-bezier(.22,.72,.25,1);
+    }
+    .flashcard.flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute;
+      inset: 0;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+    .back { transform: rotateY(180deg); }
+    .topline { display: flex; gap: 8px; align-items: center; }
+    .spacer { flex: 1; }
+    .badge {
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 6px 11px;
+      color: white;
+      background: var(--green);
+      font-size: 13px;
+      font-weight: 850;
+    }
+    .badge.blue { background: var(--blue); }
+    .badge.red { background: var(--red); }
+    .badge.yellow { background: var(--yellow); }
+    .badge.pink { background: var(--pink); }
+    .sound {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      color: var(--text);
+      font-weight: 800;
+    }
+    .front-center {
+      flex: 1;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+    .word {
+      margin: 0;
+      font-size: clamp(46px, 7vw, 68px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+    .ipa { color: var(--muted); font-size: 22px; font-weight: 720; }
+    .hint { color: var(--muted); font-size: 14px; }
+    .translation { margin: 14px 0 8px; font-size: 40px; letter-spacing: 0; }
+    .example { font-size: 21px; font-weight: 760; line-height: 1.38; }
+    .note { line-height: 1.62; color: var(--text); }
+    .divider { height: 1px; margin: 14px 0; background: var(--line); }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+    .quiz-box {
+      width: min(680px, 100%);
+      min-height: 390px;
+      padding: 24px;
+      display: grid;
+      align-content: start;
+      gap: 16px;
+    }
+    .kicker { color: var(--muted); font-size: 14px; font-weight: 820; }
+    .prompt { margin: 0; font-size: clamp(30px, 5vw, 52px); line-height: 1.12; letter-spacing: 0; }
+    .choices { display: grid; gap: 10px; }
+    .choice-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .choice {
+      flex: 1;
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      background: var(--surface-2);
+      text-align: left;
+      font-weight: 760;
+    }
+    .choice.correct { color: white; background: var(--green); border-color: transparent; }
+    .choice.wrong { color: white; background: var(--red); border-color: transparent; }
+    .answer-input {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0 14px;
+      color: var(--text);
+      background: var(--surface-2);
+    }
+    .feedback { min-height: 26px; font-weight: 820; }
+    .feedback.good { color: var(--green); }
+    .feedback.bad { color: var(--red); }
+
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .word-card { padding: 14px; box-shadow: none; display: grid; gap: 8px; }
+    .word-card header { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+    .word-card h3 { margin: 0; font-size: 22px; }
+    .word-card p { margin: 0; color: var(--muted); line-height: 1.45; }
+    .topic-title { margin: 22px 0 10px; }
+    .progress-line {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(102,112,133,.18);
+      overflow: hidden;
+    }
+    .progress-line div {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      width: 0;
+      transition: width .25s ease;
+    }
+    .audio-status {
+      width: min(680px, 100%);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      box-shadow: 0 12px 30px rgba(20,36,64,.08);
+    }
+    .audio-status strong { color: var(--text); }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      aside { position: static; border-right: 0; border-bottom: 1px solid var(--line); }
+      .dashboard { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      main { padding: 18px; }
+      .stage { height: 430px; }
+      .translation { font-size: 34px; }
+    }
+    @media (max-width: 560px) {
+      aside { padding: 14px; }
+      .brand h1 { font-size: 24px; }
+      .brand p, .plan-list { display: none; }
+      .nav { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      main { padding: 12px; gap: 12px; }
+      .dashboard { gap: 8px; }
+      .stat { padding: 12px; }
+      .toolbar { gap: 12px; }
+      .pill { padding: 8px 10px; font-size: 13px; }
+      .stage { height: 390px; }
+      .card-face { padding: 16px; }
+      .word, .prompt { font-size: clamp(34px, 12vw, 54px); }
+      .quiz-box { padding: 16px; }
+      .answer-input { font-size: 16px; }
+      .controls { gap: 8px; }
+      .controls button { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="runtime-warning" id="runtimeWarning">
+    <strong>如果这里一直显示，说明当前打开方式没有运行脚本。</strong>
+    iPhone「文件」App 的预览可能只显示界面、不执行按钮功能。请用 Safari/Chrome 打开这个 HTML；如果是 AirDrop 文件，先存到“文件”，再长按/分享尝试用浏览器打开。
+  </div>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <h1>A1.1 手机复习</h1>
+        <p>手机复习版本：进度保存在当前手机浏览器。范围：Word 全部内容 + 教材开头到书页36。</p>
+      </div>
+      <div class="nav">
+        <button class="active" data-view="review">随机背诵</button>
+        <button data-view="topics">分类词库</button>
+        <button data-view="quiz">分 topic 测验</button>
+        <button data-view="mock">最终模拟</button>
+        <button data-view="plan">复习计划</button>
+      </div>
+      <div class="plan-list" id="sidePlan"></div>
+    </aside>
+
+    <main>
+      <section class="dashboard">
+        <div class="stat"><span>总卡片</span><strong id="totalCount">0</strong></div>
+        <div class="stat"><span>今日目标</span><strong id="goalCount">0/20</strong></div>
+        <div class="stat"><span>已掌握</span><strong id="masteredCount">0</strong></div>
+        <div class="stat"><span>模拟分数</span><strong id="mockScore">-</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <h2 id="viewTitle">随机背诵</h2>
+            <p class="muted" id="viewSubtitle">按计划日期、掌握度和 topic 自动抽题；手机进度保存在当前浏览器。</p>
+          </div>
+          <div>
+            <div class="segmented" id="dayFilters" style="margin-bottom:8px"></div>
+            <div class="segmented" id="priorityFilters" style="margin-bottom:8px"></div>
+            <div class="segmented" id="topicFilters"></div>
+          </div>
+        </div>
+        <div class="progress-line"><div id="progressBar"></div></div>
+      </section>
+
+      <section id="reviewView" class="study-layout"></section>
+      <section id="topicsView" class="hidden"></section>
+      <section id="quizView" class="study-layout hidden"></section>
+      <section id="mockView" class="study-layout hidden"></section>
+      <section id="planView" class="hidden"></section>
+    </main>
+  </div>
+
+  <script src="exam-data.js?v=20260628-card-return-scope"></script>
+  <script>
+    const topics = window.EXAM_TOPICS || [
+      "发音与短句",
+      "时间与日期",
+      "颜色与描述",
+      "状态与身体",
+      "国家城市与国籍",
+      "冠词与语法",
+      "书页36：Sortir"
+    ];
+
+    const scope = window.EXAM_SCOPE || {};
+
+    const plan = [
+      ["6月29日 周一", "病中保底版：今日目标降为 12 张。只做 P00 核心语法和提问表达的第一轮，优先 être/avoir/s’appeler、否定、省音缩写、疑问词、倒装。若头昏或鼻塞明显，只做“看词卡 + 播放 + 已掌握/需要复习”，不要硬做拼写。"],
+      ["6月30日 周二", "上午先补周一 P00 错题，再做数字日期时间。数字按规律背，重点周几、月份、日期、时间表达；如果精神恢复，再补发音课堂、问候礼貌、身份介绍、颜色描述。"],
+      ["7月1日 周三", "完成 P0 必会小 topic：个人信息表格与邮箱、身体与健康、教材前36页场景、书页36 Sortir。个人信息重点表格字段、邮箱符号、密码/电话/出生日期；身体健康重点 j’ai faim/soif/mal à..., je suis...；Sortir 重点时间和电影场次。"],
+      ["7月2日 周四", "大 topic 抓重点 + 第一套模拟：国家国籍城市、物品与词库、喜好活动出行、职业。职业只背高频和阴阳性规律；国家重点 en/au/aux 和国籍配合；物品重点 un/une/des, ce/cette/ces, mon/ma/mes。"],
+      ["7月3日 周五上午", "不学新内容。只做最终全范围模拟、错题回炉、听写复查。最后 30 分钟看 P00 语法、数字时间、邮箱符号、否定省音、倒装连字符。"]
+    ];
+
+    const cards = (window.EXAM_CARDS || []).map((card, index) => ({ id: index + 1, mastery: "unseen", ...card }));
+
+    const state = {
+      view: "review",
+      studyDay: "6月29日 周一：核心语法",
+      topic: "全部",
+      priority: "全部",
+      current: null,
+      flipped: false,
+      quiz: null,
+      cardPreview: null,
+      mock: { active: false, index: 0, score: 0, questions: [] },
+      progress: loadProgress()
+    };
+
+    const audioState = {
+      initialized: false,
+      voices: [],
+      lastError: "",
+      selectedVoice: null,
+      utterance: null
+    };
+
+    function markRuntimeReady() {
+      const warning = document.getElementById("runtimeWarning");
+      if (warning) warning.style.display = "none";
+    }
+
+    function safeStorageGet(key, fallback = "") {
+      try { return localStorage.getItem(key) ?? fallback; }
+      catch { return fallback; }
+    }
+
+    function safeStorageSet(key, value) {
+      try { localStorage.setItem(key, value); }
+      catch { /* Some mobile file previews disable localStorage. Keep the app usable. */ }
+    }
+
+    function loadProgress() {
+      try { return JSON.parse(safeStorageGet("a11ExamProgress", "{}") || "{}"); }
+      catch { return {}; }
+    }
+
+    function saveProgress() {
+      safeStorageSet("a11ExamProgress", JSON.stringify(state.progress));
+      updateStats();
+    }
+
+    function progressFor(card) {
+      return state.progress[card.id] || { mastery: card.mastery, seen: 0, correct: 0, wrong: 0 };
+    }
+
+    function setProgress(card, mastery, correctDelta = 0, wrongDelta = 0) {
+      const current = progressFor(card);
+      state.progress[card.id] = {
+        mastery,
+        seen: current.seen + 1,
+        correct: current.correct + correctDelta,
+        wrong: current.wrong + wrongDelta,
+        updatedAt: new Date().toISOString()
+      };
+      saveProgress();
+    }
+
+    function filteredCards() {
+      let list = cards;
+      if (state.studyDay && state.studyDay !== "全部计划") {
+        list = list.filter(card => card.studyDay === state.studyDay);
+      }
+      if (state.priority && state.priority !== "全部") {
+        list = list.filter(card => card.priority === state.priority);
+      }
+      if (state.topic && state.topic !== "全部") {
+        list = list.filter(card => card.topic === state.topic);
+      }
+      return list.length ? list : cards;
+    }
+
+    function chooseWeighted(list) {
+      const weights = { unseen: 5, learning: 4, familiar: 2, mastered: 0.7 };
+      const priorityWeights = { P00: 6.0, P0: 3.0, P1: 1.25, P2: 0.35 };
+      const weighted = list.map(card => ({
+        card,
+        weight: (weights[progressFor(card).mastery] || 3) * (priorityWeights[card.priority] || 1)
+      }));
+      const total = weighted.reduce((sum, item) => sum + item.weight, 0);
+      let roll = Math.random() * total;
+      for (const item of weighted) {
+        roll -= item.weight;
+        if (roll <= 0) return item.card;
+      }
+      return list[0];
+    }
+
+    function nextAdaptive(forceCard = false) {
+      const list = filteredCards();
+      const card = chooseWeighted(list);
+      state.cardPreview = null;
+      const mastery = progressFor(card).mastery;
+      const modes = forceCard || mastery === "unseen"
+        ? ["card", "fr2zh", "listening"]
+        : mastery === "learning"
+          ? ["fr2zh", "listening", "zh2frChoice", "zh2fr"]
+          : ["zh2fr", "zh2frChoice", "spelling", "listening"];
+      const mode = modes[Math.floor(Math.random() * modes.length)];
+      if (mode === "card") {
+        state.current = card;
+        state.quiz = null;
+      } else {
+        state.current = null;
+        state.quiz = buildQuestion(mode, card, filteredCards());
+      }
+      state.flipped = false;
+      renderReview();
+    }
+
+    function cleanAnswer(value) {
+      return value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[’']/g, "")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function answerCandidates(question) {
+      const raw = [question.correct, question.card.answer, question.card.french]
+        .filter(Boolean)
+        .flatMap(value => String(value).split(/\s*\/\s*|\s*;\s*/));
+      return [...new Set(raw.map(cleanAnswer).filter(Boolean))];
+    }
+
+    function answerMatches(value, question) {
+      const cleaned = cleanAnswer(value);
+      if (!cleaned) return false;
+      return answerCandidates(question).includes(cleaned);
+    }
+
+    function sampleChoices(correctCard, pool, getter) {
+      const choices = [getter(correctCard)];
+      const shuffled = pool.filter(card => card.id !== correctCard.id).sort(() => Math.random() - 0.5);
+      for (const card of shuffled) {
+        const value = getter(card);
+        if (value && !choices.includes(value)) choices.push(value);
+        if (choices.length === 4) break;
+      }
+      return choices.sort(() => Math.random() - 0.5);
+    }
+
+    function buildQuestion(mode, card, pool = cards) {
+      if (mode === "fr2zh") {
+        return {
+          mode, card,
+          title: "法译中",
+          prompt: card.french,
+          sub: "选择正确中文意思",
+          correct: card.chinese,
+          choices: sampleChoices(card, pool, item => item.chinese)
+        };
+      }
+      if (mode === "listening") {
+        return {
+          mode, card,
+          title: "听力理解",
+          prompt: "先播放，再选择意思",
+          sub: "不会显示法语词",
+          correct: card.chinese,
+          choices: sampleChoices(card, pool, item => item.chinese)
+        };
+      }
+      if (mode === "zh2frChoice") {
+        return {
+          mode, card,
+          title: "中译法选择",
+          prompt: card.chinese,
+          sub: "选择正确法语；每个法语选项都可以播放",
+          correct: card.french,
+          choices: sampleChoices(card, pool, item => item.french)
+        };
+      }
+      if (mode === "spelling") {
+        return {
+          mode, card,
+          title: "听音拼写",
+          prompt: "输入听到的法语",
+          sub: "重音符号要尽量正确，例如 é、è、ç、à",
+          correct: card.answer,
+          input: true
+        };
+      }
+      return {
+        mode, card,
+        title: "中译法",
+        prompt: card.chinese,
+        sub: "输入对应法语",
+        correct: card.answer,
+        input: true
+      };
+    }
+
+    function initAudio() {
+      if (!("speechSynthesis" in window)) {
+        audioState.lastError = "当前浏览器不支持语音合成。";
+        renderAudioStatus();
+        return false;
+      }
+      audioState.voices = window.speechSynthesis.getVoices();
+      audioState.selectedVoice =
+        audioState.voices.find(voice => voice.lang.toLowerCase() === "fr-fr") ||
+        audioState.voices.find(voice => voice.lang.toLowerCase().startsWith("fr")) ||
+        null;
+      audioState.initialized = true;
+      audioState.lastError = audioState.selectedVoice ? "" : "没有找到法语声音，会尝试使用浏览器默认声音。";
+      renderAudioStatus();
+      return true;
+    }
+
+    function normalizeSpeechText(text) {
+      return String(text || "")
+        .replace(/\s*\/\s*/g, " ou ")
+        .replace(/\([^)]*\)/g, "")
+        .replace(/\[[^\]]*\]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function speak(text) {
+      const spokenText = normalizeSpeechText(text);
+      if (!spokenText) return;
+      speakWithBrowserVoice(spokenText);
+    }
+
+    function speakWithBrowserVoice(spokenText) {
+      if (!initAudio()) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(spokenText);
+        utterance.lang = "fr-FR";
+        utterance.rate = 0.78;
+        utterance.pitch = 1;
+        if (audioState.selectedVoice) utterance.voice = audioState.selectedVoice;
+        utterance.onstart = () => {
+          audioState.lastError = `正在播放：${spokenText}`;
+          renderAudioStatus();
+        };
+        utterance.onerror = event => {
+          audioState.lastError = `播放失败：${event.error || "unknown"}`;
+          renderAudioStatus();
+        };
+        utterance.onend = () => {
+          audioState.lastError = "播放完成";
+          renderAudioStatus();
+        };
+        audioState.utterance = utterance;
+        window.speechSynthesis.speak(utterance);
+        setTimeout(() => {
+          if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+            audioState.lastError = "浏览器没有开始播放。请确认手机静音开关、音量和浏览器语音权限。";
+            renderAudioStatus();
+          }
+        }, 600);
+      } catch (error) {
+        audioState.lastError = `播放异常：${error.message || error}`;
+        renderAudioStatus();
+      }
+    }
+
+    function cardText(card) {
+      if (card.spoken) return card.spoken;
+      if (card.kind === "语法" && card.example && card.example !== card.french) return card.example;
+      return card.spoken || card.french.replace(/\s*\/\s*.*/, "");
+    }
+
+    function audioStatusHtml() {
+      const voiceName = audioState.selectedVoice ? `${audioState.selectedVoice.name} (${audioState.selectedVoice.lang})` : "未选择法语声音";
+      const message = audioState.lastError || "手机网页版使用浏览器法语语音；第一次播放需要手动点击按钮。";
+      return `
+        <div class="audio-status" id="audioStatus">
+          <span><strong>声音</strong>：${escapeHtml(voiceName)} · ${escapeHtml(message)}</span>
+          <button class="ghost" id="audioTestBtn">测试法语声音</button>
+        </div>
+      `;
+    }
+
+    function bindAudioStatus(root = document) {
+      const button = root.querySelector("#audioTestBtn");
+      if (button) button.onclick = () => speak("bonjour");
+    }
+
+    function renderAudioStatus() {
+      document.querySelectorAll("#audioStatus").forEach(el => {
+        el.outerHTML = audioStatusHtml();
+      });
+      bindAudioStatus(document);
+    }
+
+    function renderReview() {
+      const el = document.getElementById("reviewView");
+      el.innerHTML = "";
+      if (state.quiz) {
+        el.insertAdjacentHTML("beforeend", audioStatusHtml());
+        el.appendChild(renderQuestion(state.quiz, false));
+        bindAudioStatus(el);
+        if (state.quiz.mode === "listening") setTimeout(() => speak(cardText(state.quiz.card)), 120);
+        return;
+      }
+      const card = state.current || chooseWeighted(filteredCards());
+      state.current = card;
+      const progress = progressFor(card);
+      el.innerHTML = `
+        ${audioStatusHtml()}
+        <div class="stage">
+          <div class="flashcard ${state.flipped ? "flipped" : ""}" id="flashcard">
+            <div class="card-face">
+              <div class="topline">
+                <span class="badge ${priorityClass(card.priority)}">${priorityLabel(card.priority)}</span>
+                <span class="badge">${card.topic}</span>
+                <span class="badge blue">${escapeHtml(card.kind || "词汇")}</span>
+                <span class="badge ${badgeClass(progress.mastery)}">${masteryLabel(progress.mastery)}</span>
+                <span class="spacer"></span>
+                <button class="sound" data-say="${escapeHtml(cardText(card))}">播放</button>
+              </div>
+              <div class="front-center">
+                <h3 class="word">${escapeHtml(card.french)}</h3>
+                <div class="ipa">${escapeHtml(card.ipa)}</div>
+                <div class="hint">点击卡片查看中文、例句和考点</div>
+              </div>
+            </div>
+            <div class="card-face back">
+              <div class="topline">
+                <span class="badge ${priorityClass(card.priority)}">${priorityLabel(card.priority)}</span>
+                <span class="badge">${card.topic}</span>
+                <span class="spacer"></span>
+                <button class="sound" data-say="${escapeHtml(card.example)}">播放例句</button>
+              </div>
+              <h3 class="translation">${escapeHtml(card.chinese)}</h3>
+              <div class="divider"></div>
+              <div class="example">${escapeHtml(card.example)}</div>
+              <div class="divider"></div>
+              <p class="note">${escapeHtml(card.note)}</p>
+            </div>
+          </div>
+        </div>
+        <div class="controls">
+          ${state.cardPreview ? `
+            <button class="primary" id="returnQuestionBtn">返回本题</button>
+          ` : `
+            <button class="primary" id="knownBtn">已掌握/跳过</button>
+            <button class="danger" id="reviewBtn">需要复习</button>
+            <button class="ghost" id="nextBtn">下一题</button>
+          `}
+        </div>
+      `;
+      bindAudioStatus(el);
+      document.getElementById("flashcard").onclick = event => {
+        if (event.target.closest("button")) return;
+        state.flipped = !state.flipped;
+        renderReview();
+      };
+      el.querySelectorAll("[data-say]").forEach(button => {
+        button.onclick = event => {
+          event.stopPropagation();
+          speak(button.dataset.say);
+        };
+      });
+      const returnBtn = document.getElementById("returnQuestionBtn");
+      if (returnBtn) {
+        returnBtn.onclick = () => {
+          const preview = state.cardPreview;
+          state.cardPreview = null;
+          state.current = null;
+          state.flipped = false;
+          if (preview?.mockMode) {
+            setView("mock");
+          } else {
+            state.quiz = preview?.question || null;
+            renderReview();
+          }
+        };
+      } else {
+        document.getElementById("knownBtn").onclick = () => { setProgress(card, "mastered", 1, 0); nextAdaptive(); };
+        document.getElementById("reviewBtn").onclick = () => { setProgress(card, "learning", 0, 1); nextAdaptive(); };
+        document.getElementById("nextBtn").onclick = () => nextAdaptive();
+      }
+    }
+
+    function renderQuestion(question, mockMode) {
+      const box = document.createElement("div");
+      box.className = "quiz-box";
+      const prompt = question.mode === "listening"
+        ? `<button class="primary" data-say="${escapeHtml(cardText(question.card))}">播放本题</button>`
+        : `<h3 class="prompt">${escapeHtml(question.prompt)}</h3>`;
+      box.innerHTML = `
+        <div class="kicker">${escapeHtml(question.title)} · ${priorityLabel(question.card.priority)} · ${escapeHtml(question.card.topic)}</div>
+        ${prompt}
+        <p class="muted">${escapeHtml(question.sub)}</p>
+        <div id="questionBody"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="controls">
+          <button class="ghost" id="showCard">看词卡</button>
+          <button class="primary" id="questionNext">${mockMode ? "下一题" : "继续随机"}</button>
+        </div>
+      `;
+      const body = box.querySelector("#questionBody");
+      const feedback = box.querySelector("#feedback");
+      if (question.input) {
+        body.innerHTML = `
+          <input class="answer-input" id="answerInput" autocomplete="off" placeholder="输入法语答案">
+          <div class="controls" style="justify-content:flex-start;margin-top:10px">
+            <button class="primary" id="checkAnswer">检查</button>
+            <button class="ghost" data-say="${escapeHtml(cardText(question.card))}">播放</button>
+          </div>
+        `;
+        body.querySelector("#checkAnswer").onclick = () => {
+          const value = body.querySelector("#answerInput").value;
+          const ok = answerMatches(value, question);
+          handleAnswer(ok, question, feedback, mockMode);
+        };
+        body.querySelector("#answerInput").addEventListener("keydown", event => {
+          if (event.key === "Enter") body.querySelector("#checkAnswer").click();
+        });
+      } else {
+        body.className = "choices";
+        question.choices.forEach(choice => {
+          const row = document.createElement("div");
+          row.className = "choice-row";
+          const optionIsFrench = question.mode === "zh2frChoice";
+          const optionCard = cards.find(card => card.french === choice || card.answer === choice);
+          const optionAudio = optionCard ? cardText(optionCard) : choice;
+          row.innerHTML = `
+            <button class="choice">${escapeHtml(choice)}</button>
+            ${optionIsFrench ? `<button class="sound" data-say="${escapeHtml(optionAudio)}">播放</button>` : ""}
+          `;
+          row.querySelector(".choice").onclick = () => {
+            const ok = choice === question.correct;
+            row.querySelector(".choice").classList.add(ok ? "correct" : "wrong");
+            handleAnswer(ok, question, feedback, mockMode);
+          };
+          body.appendChild(row);
+        });
+      }
+      box.querySelectorAll("[data-say]").forEach(button => {
+        button.onclick = event => {
+          event.stopPropagation();
+          speak(button.dataset.say);
+        };
+      });
+      box.querySelector("#showCard").onclick = () => {
+        state.cardPreview = { question, mockMode };
+        state.current = question.card;
+        state.quiz = null;
+        state.flipped = true;
+        state.view = "review";
+        setView("review");
+      };
+      box.querySelector("#questionNext").onclick = () => {
+        if (mockMode) nextMockQuestion();
+        else nextAdaptive();
+      };
+      return box;
+    }
+
+    function handleAnswer(ok, question, feedback, mockMode) {
+      feedback.textContent = ok ? "正确" : `不对，答案是：${question.correct}`;
+      feedback.className = `feedback ${ok ? "good" : "bad"}`;
+      if (!mockMode) setProgress(question.card, ok ? "familiar" : "learning", ok ? 1 : 0, ok ? 0 : 1);
+      if (mockMode && !question.done) {
+        question.done = true;
+        if (ok) state.mock.score += 1;
+      }
+      updateStats();
+    }
+
+    function renderTopics() {
+      const el = document.getElementById("topicsView");
+      el.innerHTML = "";
+      const dayOrder = scope.study_day_order || [];
+      const dayTopics = scope.study_day_topics || {};
+      dayOrder.forEach(day => {
+        const dayCards = cards.filter(card => card.studyDay === day);
+        if (!dayCards.length) return;
+        const heading = document.createElement("h2");
+        heading.className = "topic-title";
+        const topicText = (dayTopics[day] || []).join(" / ");
+        heading.textContent = `${day}（${dayCards.length} 张）`;
+        el.appendChild(heading);
+        const summary = document.createElement("p");
+        summary.className = "muted";
+        summary.textContent = topicText ? `包括：${topicText}` : "";
+        el.appendChild(summary);
+        (dayTopics[day] || []).forEach(topic => {
+          const topicCards = dayCards.filter(card => card.topic === topic);
+          if (!topicCards.length) return;
+          const subheading = document.createElement("h3");
+          subheading.className = "topic-title";
+          subheading.textContent = `${topic} · ${topicCards.length} 张`;
+          el.appendChild(subheading);
+          const grid = document.createElement("div");
+          grid.className = "topic-grid";
+          topicCards.forEach(card => {
+            const item = document.createElement("article");
+            item.className = "word-card";
+            item.innerHTML = `
+              <header>
+                <h3>${escapeHtml(card.french)}</h3>
+                <button class="sound" data-say="${escapeHtml(cardText(card))}">播放</button>
+              </header>
+              <p><span class="badge ${priorityClass(card.priority)}">${priorityLabel(card.priority)}</span> <span class="badge blue">${escapeHtml(card.kind || "词汇")}</span></p>
+              <p><strong>${escapeHtml(card.chinese)}</strong> · ${escapeHtml(card.ipa || "")}</p>
+              <p>${escapeHtml(card.example)}</p>
+              <p>${escapeHtml(card.note)}</p>
+            `;
+            item.querySelector("[data-say]").onclick = () => speak(cardText(card));
+            grid.appendChild(item);
+          });
+          el.appendChild(grid);
+        });
+      });
+    }
+
+    function renderQuizView() {
+      const el = document.getElementById("quizView");
+      const selected = filteredCards();
+      const card = selected[Math.floor(Math.random() * selected.length)];
+      const modes = ["fr2zh", "zh2fr", "zh2frChoice", "listening", "spelling"];
+      const mode = modes[Math.floor(Math.random() * modes.length)];
+      el.innerHTML = "";
+      el.insertAdjacentHTML("beforeend", audioStatusHtml());
+      const question = buildQuestion(mode, card, selected);
+      el.appendChild(renderQuestion(question, false));
+      bindAudioStatus(el);
+      if (mode === "listening") setTimeout(() => speak(cardText(card)), 120);
+    }
+
+    function startMock() {
+      const modes = ["fr2zh", "zh2fr", "zh2frChoice", "listening", "spelling"];
+      const shuffled = [...cards].sort(() => Math.random() - 0.5).slice(0, 24);
+      state.mock = {
+        active: true,
+        index: 0,
+        score: 0,
+        questions: shuffled.map((card, index) => buildQuestion(modes[index % modes.length], card, cards))
+      };
+      renderMock();
+    }
+
+    function nextMockQuestion() {
+      state.mock.index += 1;
+      renderMock();
+    }
+
+    function renderMock() {
+      const el = document.getElementById("mockView");
+      el.innerHTML = "";
+      if (!state.mock.active) {
+        el.innerHTML = `
+          <div class="quiz-box">
+            <div class="kicker">最终模拟</div>
+            <h3 class="prompt">24 题混合模拟</h3>
+            <p class="muted">覆盖全部 topic，题型包含法译中、中译法选择、中译法输入、听力和拼写。</p>
+            <button class="primary" id="startMock">开始模拟</button>
+          </div>
+        `;
+        el.querySelector("#startMock").onclick = startMock;
+        return;
+      }
+      if (state.mock.index >= state.mock.questions.length) {
+        const score = state.mock.score;
+        safeStorageSet("a11LastMockScore", `${score}/24`);
+        updateStats();
+        el.innerHTML = `
+          <div class="quiz-box">
+            <div class="kicker">模拟完成</div>
+            <h3 class="prompt">${score}/24</h3>
+            <p class="muted">低于 20 分就回到随机背诵，优先刷错题 topic。</p>
+            <button class="primary" id="restartMock">再做一套</button>
+          </div>
+        `;
+        el.querySelector("#restartMock").onclick = startMock;
+        return;
+      }
+      const q = state.mock.questions[state.mock.index];
+      const header = document.createElement("div");
+      header.className = "panel";
+      header.innerHTML = `<strong>第 ${state.mock.index + 1} / ${state.mock.questions.length} 题</strong><span class="muted"> 当前得分 ${state.mock.score}</span>`;
+      el.appendChild(header);
+      el.insertAdjacentHTML("beforeend", audioStatusHtml());
+      el.appendChild(renderQuestion(q, true));
+      bindAudioStatus(el);
+      if (q.mode === "listening") setTimeout(() => speak(cardText(q.card)), 120);
+    }
+
+    function renderPlan() {
+      const el = document.getElementById("planView");
+      const priority = scope.priority_counts || {};
+      const topicCounts = scope.topic_counts || {};
+      const smallTopics = scope.small_must_topics || [];
+      const largeTopics = scope.large_priority_topics || [];
+      const grammarPoints = scope.grammar_points || [];
+      const coverageChecklist = scope.coverage_checklist || [];
+      const sourceChecklist = scope.source_checklist || [];
+      el.innerHTML = `
+        <div class="panel">
+          <h2>考前复习计划</h2>
+          <p class="muted">今天是 2026年6月29日 周一。昨晚鼻炎影响睡眠，今天按低状态计划执行：只保底完成 P00 核心语法/提问表达 12 张，不追求清空 120 张；明天先补错题，再推进数字日期时间。考试是 2026年7月3日 周五 14:00。</p>
+          <div class="dashboard" style="margin-bottom:14px">
+            <div class="stat"><span>P00 核心必考</span><strong>${priority.P00 || 0}</strong></div>
+            <div class="stat"><span>P0 关键必会</span><strong>${priority.P0 || 0}</strong></div>
+            <div class="stat"><span>P1 重点</span><strong>${priority.P1 || 0}</strong></div>
+            <div class="stat"><span>P2 选会 / 总</span><strong>${priority.P2 || 0}/${scope.total || cards.length}</strong></div>
+          </div>
+          <div class="topic-grid">
+            ${plan.map(([day, task]) => `<article class="word-card"><h3>${day}</h3><p>${task}</p></article>`).join("")}
+          </div>
+          <h2 class="topic-title">小 Topic 全必会</h2>
+          <div class="topic-grid">
+            ${smallTopics.map(topic => `<article class="word-card"><h3>${topic}</h3><p>${topicCounts[topic] || 0} 张：内容少、考试直接出题概率高，必须全过。</p></article>`).join("")}
+          </div>
+          <h2 class="topic-title">大 Topic 先抓重点</h2>
+          <div class="topic-grid">
+            ${largeTopics.map(text => `<article class="word-card"><p>${text}</p></article>`).join("")}
+          </div>
+          <h2 class="topic-title">必会语法点</h2>
+          <div class="topic-grid">
+            ${grammarPoints.map(text => `<article class="word-card"><p>${text}</p></article>`).join("")}
+          </div>
+          <h2 class="topic-title">教材开头到书页36覆盖核对</h2>
+          <div class="topic-grid">
+            ${coverageChecklist.map(text => `<article class="word-card"><p>${text}</p></article>`).join("")}
+          </div>
+          <h2 class="topic-title">范围来源核对</h2>
+          <div class="topic-grid">
+            ${sourceChecklist.map(text => `<article class="word-card"><p>${text}</p></article>`).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTopicFilters() {
+      const container = document.getElementById("topicFilters");
+      container.innerHTML = "";
+      const availableTopics = [...new Set(cards
+        .filter(card => !state.studyDay || state.studyDay === "全部计划" || card.studyDay === state.studyDay)
+        .map(card => card.topic))];
+      const plannedOrder = state.studyDay && state.studyDay !== "全部计划" ? (scope.study_day_topics?.[state.studyDay] || []) : topics;
+      availableTopics.sort((a, b) => plannedOrder.indexOf(a) - plannedOrder.indexOf(b));
+      if (state.topic !== "全部" && !availableTopics.includes(state.topic)) state.topic = "全部";
+      ["全部", ...availableTopics].forEach(topic => {
+        const button = document.createElement("button");
+        button.className = `pill ${state.topic === topic ? "active" : ""}`;
+        button.textContent = topic;
+        button.onclick = () => {
+          state.topic = topic;
+          renderTopicFilters();
+          if (state.view === "review") nextAdaptive(true);
+          if (state.view === "quiz") renderQuizView();
+          updateStats();
+        };
+        container.appendChild(button);
+      });
+    }
+
+    function renderStudyDayFilters() {
+      const container = document.getElementById("dayFilters");
+      if (!container) return;
+      const days = ["全部计划", ...(scope.study_day_order || [])];
+      container.innerHTML = "";
+      days.forEach(day => {
+        const button = document.createElement("button");
+        button.className = `pill ${state.studyDay === day ? "active" : ""}`;
+        button.textContent = day.replace("：", " ");
+        button.onclick = () => {
+          state.studyDay = day;
+          state.topic = "全部";
+          renderStudyDayFilters();
+          renderTopicFilters();
+          if (state.view === "review") nextAdaptive(true);
+          if (state.view === "quiz") renderQuizView();
+          updateStats();
+        };
+        container.appendChild(button);
+      });
+    }
+
+    function renderPriorityFilters() {
+      const container = document.getElementById("priorityFilters");
+      if (!container) return;
+      const priorities = [
+        ["P00", "P00 核心必考"],
+        ["P0", "P0 关键必会"],
+        ["P1", "P1 重点"],
+        ["P2", "P2 选会"],
+        ["全部", "全部优先级"]
+      ];
+      container.innerHTML = "";
+      priorities.forEach(([value, label]) => {
+        const button = document.createElement("button");
+        button.className = `pill ${state.priority === value ? "active" : ""}`;
+        button.textContent = label;
+        button.onclick = () => {
+          state.priority = value;
+          renderPriorityFilters();
+          if (state.view === "review") nextAdaptive(true);
+          if (state.view === "quiz") renderQuizView();
+          updateStats();
+        };
+        container.appendChild(button);
+      });
+    }
+
+    function setView(view) {
+      state.view = view;
+      document.querySelectorAll(".nav button").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === view);
+      });
+      ["review", "topics", "quiz", "mock", "plan"].forEach(name => {
+        document.getElementById(`${name}View`).classList.toggle("hidden", name !== view);
+      });
+      const titles = {
+        review: ["随机背诵", "按计划日期、掌握度和 topic 自动抽题，随机出现闪卡、听力、拼写和互译。"],
+        topics: ["分类词库", "按周一到周五计划排序，点击单张卡可播放。"],
+        quiz: ["分计划测验", "选择日期或 topic 后随机生成四类题型。"],
+        mock: ["最终模拟", "全部内容混合抽题，模拟考前检测。"],
+        plan: ["复习计划", "周日已用于调整系统，计划从 6月29日 周一重新开始。"]
+      };
+      document.getElementById("viewTitle").textContent = titles[view][0];
+      document.getElementById("viewSubtitle").textContent = titles[view][1];
+      if (view === "review") {
+        if (state.cardPreview && state.current) renderReview();
+        else nextAdaptive(true);
+      }
+      if (view === "topics") renderTopics();
+      if (view === "quiz") renderQuizView();
+      if (view === "mock") renderMock();
+      if (view === "plan") renderPlan();
+      renderStudyDayFilters();
+      renderPriorityFilters();
+      renderTopicFilters();
+    }
+
+    function updateStats() {
+      document.getElementById("totalCount").textContent = filteredCards().length;
+      const learnedToday = Object.values(state.progress).filter(item => item.updatedAt && item.updatedAt.slice(0, 10) === new Date().toISOString().slice(0, 10)).length;
+      const today = new Date().toISOString().slice(0, 10);
+      const dailyGoal = today === "2026-06-29" ? 12 : 20;
+      document.getElementById("goalCount").textContent = `${Math.min(learnedToday, dailyGoal)}/${dailyGoal}`;
+      const mastered = cards.filter(card => progressFor(card).mastery === "mastered").length;
+      document.getElementById("masteredCount").textContent = mastered;
+      document.getElementById("mockScore").textContent = safeStorageGet("a11LastMockScore", "-") || "-";
+      document.getElementById("progressBar").style.width = `${Math.round((mastered / cards.length) * 100)}%`;
+    }
+
+    function renderSidePlan() {
+      document.getElementById("sidePlan").innerHTML = plan.map(([day, task]) => `
+        <div class="plan-item"><strong>${day}</strong><span>${task}</span></div>
+      `).join("");
+    }
+
+    function masteryLabel(value) {
+      return { unseen: "未学", learning: "复习中", familiar: "较熟", mastered: "已掌握" }[value] || value;
+    }
+
+    function badgeClass(value) {
+      return { unseen: "yellow", learning: "red", familiar: "blue", mastered: "" }[value] || "";
+    }
+
+    function priorityLabel(value) {
+      return { P00: "核心必考", P0: "关键必会", P1: "重点", P2: "选会" }[value] || "重点";
+    }
+
+    function priorityClass(value) {
+      return { P00: "pink", P0: "red", P1: "yellow", P2: "blue" }[value] || "yellow";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    markRuntimeReady();
+    window.speechSynthesis?.getVoices();
+    document.querySelectorAll(".nav button").forEach(button => {
+      button.onclick = () => setView(button.dataset.view);
+    });
+    renderSidePlan();
+    renderStudyDayFilters();
+    renderPriorityFilters();
+    renderTopicFilters();
+    updateStats();
+    nextAdaptive(true);
+  </script>
+</body>
+</html>
